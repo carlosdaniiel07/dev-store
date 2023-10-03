@@ -1,0 +1,33 @@
+version: '3'
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: devstore-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: "devstore"
+      RABBITMQ_DEFAULT_PASS: "devstore"
+    expose:
+      - 5672
+    ports:
+      - 15672:15672
+      - 5672:5672
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: devstore-sqlserver
+    environment:
+      MSSQL_SA_PASSWORD: "yourStrong(!)Password"
+      ACCEPT_EULA: "Y"
+    expose:
+      - 1433
+    ports:
+      - 1433:1433
+  seq:
+    image: datalust/seq:latest
+    container_name: devstore-seq
+    environment:
+      ACCEPT_EULA: "Y"
+    expose:
+      - 5341
+    ports:
+      - 5341:5341
+      - 80:80
