@@ -17,7 +17,7 @@ namespace DevStore.ShoppingCart.API.Services
         }
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await _bus.SubscribeAsync<OrderDoneIntegrationEvent>("OrderDone", RemoveShoppingCart);
+            await _bus.SubscribeAsync<OrderDoneIntegrationEvent>("OrderDone", "DevStore.ShoppingCart.API", RemoveShoppingCart, stoppingToken);
         }
 
         private async Task RemoveShoppingCart(OrderDoneIntegrationEvent message)
