@@ -2,7 +2,6 @@
 using DevStore.Core.Messages.Integration;
 using DevStore.MessageBus.Serializer;
 using System;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,7 +11,6 @@ namespace DevStore.MessageBus
     {
         private readonly string _bootstrapServers;
         private readonly ProducerConfig _producerConfig;
-        private readonly JsonSerializerOptions _serializerOptions;
 
         public KafkaMessageBus(string bootstrapServers)
         {
@@ -20,11 +18,6 @@ namespace DevStore.MessageBus
             _producerConfig = new ProducerConfig
             {
                 BootstrapServers = bootstrapServers,
-            };
-            _serializerOptions = new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             };
         }
 
