@@ -48,6 +48,7 @@ namespace DevStore.MessageBus
                     BootstrapServers = _bootstrapServers,
                     EnableAutoCommit = false,
                     EnablePartitionEof = true,
+                    AutoOffsetReset = AutoOffsetReset.Latest,
                 };
 
                 using var consumerBuilder = new ConsumerBuilder<string, T>(consumerConfig)
