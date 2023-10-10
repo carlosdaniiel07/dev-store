@@ -18,7 +18,10 @@ namespace DevStore.MessageBus
             _producerConfig = new ProducerConfig
             {
                 BootstrapServers = bootstrapServers,
-                Acks = Acks.Leader,
+                EnableIdempotence = true,
+                MaxInFlight = 1,
+                MessageSendMaxRetries = 2,
+                Acks = Acks.All,
             };
         }
 
