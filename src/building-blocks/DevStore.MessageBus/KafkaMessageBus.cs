@@ -1,5 +1,6 @@
 ﻿using Confluent.Kafka;
 using DevStore.Core.Messages.Integration;
+using DevStore.MessageBus.Serializer;
 using System;
 using System.Text.Json;
 using System.Threading;
@@ -32,12 +33,14 @@ namespace DevStore.MessageBus
             ArgumentNullException.ThrowIfNull(message);
             ArgumentNullException.ThrowIfNull(message.Topic);
 
-            using var producerBuilder = new ProducerBuilder<string, string>(_producerConfig).Build();
+            using var producerBuilder = new ProducerBuilder<string, T>(_producerConfig)
+                .SetValueSerializer(new DevStoreSerializer<T>())
+                .Build();
 
-            await producerBuilder.ProduceAsync(message.Topic, new Message<string, string>
+            await producerBuilder.ProduceAsync(message.Topic, new Message<string, T>
             {
                 Key = (message.AggregateId == Guid.Empty ? Guid.NewGuid() : message.AggregateId).ToString(),
-                Value = JsonSerializer.Serialize(message, _serializerOptions),
+                Value = message,
             });
         }
 
@@ -53,7 +56,9 @@ namespace DevStore.MessageBus
                     EnablePartitionEof = true,
                 };
 
-                using var consumerBuilder = new ConsumerBuilder<string, string>(consumerConfig).Build();
+                using var consumerBuilder = new ConsumerBuilder<string, T>(consumerConfig)
+                    .SetValueDeserializer(new DevStoreDeserializer<T>())
+                    .Build();
 
                 consumerBuilder.Subscribe(topic);
 
@@ -64,9 +69,8 @@ namespace DevStore.MessageBus
                     if (result.IsPartitionEOF)
                         continue;
 
-                    var message = JsonSerializer.Deserialize<T>(result.Message.Value, _serializerOptions);
-
-                    await onMessage(message);
+                    await onMessage(result.Message.Value);
+                    consumerBuilder.Commit(result);
                 }
             }, cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
