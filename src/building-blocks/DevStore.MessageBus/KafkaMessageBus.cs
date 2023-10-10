@@ -48,6 +48,7 @@ namespace DevStore.MessageBus
                     BootstrapServers = _bootstrapServers,
                     EnableAutoCommit = false,
                     EnablePartitionEof = true,
+                    EnableAutoOffsetStore = false,
                     AutoOffsetReset = AutoOffsetReset.Latest,
                 };
 
@@ -64,8 +65,17 @@ namespace DevStore.MessageBus
                     if (result.IsPartitionEOF)
                         continue;
 
-                    await onMessage(result.Message.Value);
-                    consumerBuilder.Commit(result);
+                    try
+                    {
+                        await onMessage(result.Message.Value);
+
+                        consumerBuilder.Commit(result);
+                        consumerBuilder.StoreOffset(result.TopicPartitionOffset);
+                    }
+                    catch (Exception)
+                    {
+                        consumerBuilder.Seek(result.TopicPartitionOffset);
+                    }
                 }
             }, cancellationToken, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
