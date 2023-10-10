@@ -18,6 +18,7 @@ namespace DevStore.MessageBus
             _producerConfig = new ProducerConfig
             {
                 BootstrapServers = bootstrapServers,
+                Acks = Acks.Leader,
             };
         }
 
